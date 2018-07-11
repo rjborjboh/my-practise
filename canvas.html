@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Sales Transaction</title>
+<style>
+body{
+	background:#37607c;
+}
+#canvas{
+	margin:10px;
+	padding:10px;
+	background:#ffffff;
+	border:thin inset#aaaaaa;
+}
+#3dBar{
+	margin:10px;
+	padding:10px;
+	background:#ffffff;
+	border:thin inset#aaaaaa;
+}
+</style>
+<script src="angular.js" type="text/javascript"></script>
+<script type="text/javascript">
+angular.element(document).ready(function(){
+var canvas = document.getElementById('canvas');
+	context=canvas.getContext('2d');
+	FONT_HEIGHT=15,
+	MARGIN=35,
+	HAND_TRUNCATION=canvas.width/25,
+	HOUR_HAND_TRUNCATION=canvas.width/10,
+	NUMERAL_SPACING=20,
+	RADIUS=canvas.width/2-MARGIN,
+	HAND_RADIUS=RADIUS+NUMERAL_SPACING;
+
+//Functions...
+function drawCircle(){
+	context.beginPath();
+	context.arc(canvas.width/2,canvas.height/2,
+	RADIUS,0,Math.PI*2,true);
+	context.stroke();
+}
+function drawNumerals(){
+	var numerals=[1,2,3,4,5,6,7,8,9,10,11,12],
+		angle=0,
+		numeralWidth=0;
+	numerals.forEach(function(numeral){
+		angle=Math.PI/6*(numeral-3);
+		numeralWidth=context.measureText(numeral).width;
+		context.fillText(numeral,
+		canvas.width/2+Math.cos(angle)*(HAND_RADIUS)-
+		numeralWidth/2,
+		canvas.height/2+Math.sin(angle)*(HAND_RADIUS)+
+		FONT_HEIGHT/3);
+	});
+}
+function drawCenter(){
+	context.beginPath();
+	context.arc(canvas.width/2,canvas.height/2,5,0,Math.PI*2,true);
+	context.fill();
+}
+function drawHand(loc,isHour){
+	var angle=(Math.PI*2)*(loc/60)-Math.PI/2,
+	handRadius=isHour?RADIUS-HAND_TRUNCATION-HOUR_HAND_TRUNCATION
+	:RADIUS-HAND_TRUNCATION;
+	context.moveTo(canvas.width/2,canvas.height/2);
+	context.lineTo(canvas.width/2+Math.cos(angle)*handRadius,
+	canvas.height/2+Math.sin(angle)*handRadius);
+	context.stroke();
+}
+function drawHands(){
+	var date=new Date,
+	hour=date.getHours();
+	hour=hour>12?hour-12:hour;
+	drawHand(hour*5+(date.getMinutes()/60)*5,true,0.5);
+	drawHand(date.getMinutes(),false,0.5);
+	drawHand(date.getSeconds(),false,0.2);
+}
+function drawClock(){
+	context.clearRect(0,0,canvas.width,canvas.height);
+	drawCircle();
+	drawCenter();
+	drawHands();
+	drawNumerals();
+}
+//Initialization...
+context.font=FONT_HEIGHT+'px Arial';
+loop=setInterval(drawClock,1000);
+window.addEventListener('keydown', function(e){
+	var newDom = document.createElement('div');
+	newDom.innerHtml = String.fromCharCode(e.which);
+	document.body.appendChild(newDom);
+});
+});
+</script>
+<script type="text/javascript">
+angular.element(document).ready(function(){
+CanvasRenderingContext2D.prototype.oval = function  (x, y, width, height) {
+    var k = (width/0.75)/2,
+      w = width/2,
+      h = height/2;
+  this.beginPath();
+  this.moveTo(x, y-h);
+  console.log('circle:' + x + ',' + (y-h));
+  this.bezierCurveTo(x+k, y-h, x+k, y+h, x, y+h);
+  console.log('bezierCurve:' + (x+k) + ',' + (y-h) + ','+ (x+k) + ',' + (y+h) + ',' +x + ',' + (y+h));
+  this.bezierCurveTo(x-k, y+h, x-k, y-h, x, y-h);
+  console.log('bezierCurve:' + (x-k) + ',' + (y+h) + ',' + (x-k) + ',' + (y-h) + ',' + x + ',' + (y-h));
+  this.closePath();
+  return this;
+}
+CanvasRenderingContext2D.prototype.ellipse = function( x, y, a, b)
+{
+   this.save();
+   //选择a、b中的较大者作为arc方法的半径参数
+   var r = (a > b) ? a : b; 
+   var ratioX = a / r; //横轴缩放比率
+   var ratioY = b / r; //纵轴缩放比率
+   this.scale(ratioX, ratioY); //进行缩放（均匀压缩）
+   this.beginPath();
+   //从椭圆的左端点开始逆时针绘制
+   this.moveTo((x + a) / ratioX, y / ratioY);
+   this.arc(x / ratioX, y / ratioY, r, 0, 2 * Math.PI);
+   //this.closePath();
+   this.restore();
+   this.stroke();
+};
+var canvasBar = document.getElementById('3dBar'),
+	plot=canvasBar.getContext('2d');
+	var BARINCOLOR = '#5581b6', YELLOW = "#FFFF00", GREEN = '#008000';
+    var x1=45, y1=16, a1=43, b1=15;
+	var x2=45, y2=y1 + 100, a2=43, b2=15;
+	
+    var x3=45, y3=y1 + 50, a3=43, b3=15;
+    
+    plot.strokeStyle = '#7c9fba';
+    
+    plot.fillStyle = BARINCOLOR;
+    plot.fillRect(0,b1,a1*2,y2-y1);
+    plot.fill();
+    
+    plot.fillStyle = BARINCOLOR;
+    plot.lineWidth  = 2;
+	plot.ellipse(x1, y1, a1, b1);
+    plot.fill();
+    
+    plot.fillStyle = YELLOW;
+    plot.fillRect(x3-a3,y3,a3*2,y2-y3);
+	plot.ellipse(x2, y2, a2, b2);
+    plot.fill();
+    
+    plot.fillStyle = YELLOW;
+	plot.ellipse(x3, y3, a3, b3);
+    plot.fill();
+    
+    plot.beginPath();
+	plot.moveTo(x1-a1, y1);
+	plot.lineTo(x2-a2, y2);
+	plot.stroke();
+    
+    plot.beginPath();
+    plot.moveTo(x1+a1, y1);
+    plot.lineTo(x2+a2, y2);
+    plot.stroke();
+});
+</script>
+</head>
+<body>
+	<canvas id='canvas' width='600' height='600'>
+		Canvas not supported
+	</canvas>
+    <canvas id='3dBar' width='90' height='140'>
+        Canvas not supported
+    </canvas>
+</body>
+</html>

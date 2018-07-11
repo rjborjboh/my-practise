@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>元素随意拖拽的实现</title>
+<style type="text/css">
+#box {
+	position : absolute;
+	left : 100px;
+	top : 100px;
+	padding : 5px;
+	background :  #f0f3f9;
+	font-size : 12px;
+	-moz-box-shadow : 2px 2px 4px #666666;
+	-webkit-box-shadow : 2px 2px 4px #666666;
+}
+#main {
+	border : 1px solid #a0b3d6;
+	background : white;
+}
+#bar {
+	line-height : 24px;
+	background :  #beceeb;
+	border-bottom : 1px solid #a0b3d6;
+	padding-left : 5px;
+	cursor : move;
+}
+#content {
+	width : 420px;
+	height : 250px;
+	padding : 10px 5px;
+}
+</style>
+<script type="text/javascript">
+(function(w){
+	w.Promise = Promise;
+	var promise = undefined,
+		fired = false,
+		thenList = [],
+		resolveList = [],
+		stacking = undefined;
+		
+	function Promise(resolve) {
+		if (!promise) promise = this;
+		resolveList[thenList.length] = resolve;
+		if (fired) return;
+		resolve.call(promise, promise.exeStack);
+		fired = true;
+	}
+	Promise.prototype = {
+		then : function(func){
+			thenList.push(func);
+			return promise;
+		},
+		exeStack : function(data){
+			stacking = thenList.shift();
+			
+			if(typeof(stacking) == 'function'){
+				stacking(data);
+				resolveList.shift();
+			}
+			
+			if(typeof(resolveList[0]) == 'function'){
+				resolveList[0].call(promise, promise.exeStack);
+			} else {
+				if (thenList.length === 0) return;
+				// promise.exeStack(undefined);
+				promise.exeStack(data);
+				resolveList.shift();
+			}
+		}
+	};
+})(window, undefined);
+function load(){
+	return new Promise(function(resolve){
+		setTimeout(function(){
+			resolve('hello world!');
+		}, 0);
+	});
+}
+load().then(function(data){
+	console.log('%c' + data, 'font-size:15px;color:red;');
+	
+	return new Promise(function(resolve){
+		setTimeout(function(){
+			resolve('HRLLO YOU!!!');
+		}, 0);
+	});
+}).then(function(data){
+	if(!data) data = 'hello you!';
+	console.log('%c' + data, 'font-size:15px;color:blue;');
+});
+</script>
+</head>
+<body>
+<div id="box">
+	<div id="main">
+    	<div id="bar">拖拽</div>
+        <div id="content">
+        	内容……
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="./drag.js"></script>
+<script type="text/javascript">
+window.onload = function(){
+	var oBox = document.getElementById("box");
+	var oBar = document.getElementById("bar");
+	startDrag(oBar, oBox);
+};
+</script>
+</body>
+</html>

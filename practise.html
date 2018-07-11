@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Practise</title>
+<style>
+.classOne {
+	color:red;
+}
+.classTwo {
+	font-size:15px;
+}
+</style>
+<script src="angular.js" type="text/javascript"></script>
+<script type="text/javascript">
+//=============================================================
+	///Step One
+	function Person(name)
+    {
+        this.name = name;   //在构造函数中定义成员
+    };
+   
+    //方法定义到构造函数的prototype上
+    Person.prototype.SayHello = function()
+    {
+        alert("Hello, I'm " + this.name);
+    };   
+   
+    //子类构造函数
+    function Employee(name, salary)
+    {
+        Person.call(this, name);    //调用上层构造函数
+        this.salary = salary;       //扩展的成员
+    };
+   
+    //子类构造函数首先需要用上层构造函数来建立prototype对象，实现继承的概念
+    Employee.prototype = new Person()   //只需要其prototype的方法，此对象的成员没有任何意义！
+   
+    //子类方法也定义到构造函数之上
+    Employee.prototype.ShowMeTheMoney = function()
+    {
+        console.log(this.name + " $" + this.salary);
+    };
+   
+    var BillGates = new Person("Bill Gates");
+    BillGates.SayHello();   
+    debugger;
+    var SteveJobs = new Employee("Steve Jobs", 1234);
+	debugger;
+    SteveJobs.SayHello();
+    SteveJobs.ShowMeTheMoney();
+	
+	///Step Two★★★★★★★★★★
+	function New(aClass, aParams)    //通用创建函数
+    {
+        function new_()     //定义临时的中转函数壳
+        {
+            aClass.Create.apply(this, aParams);   //调用原型中定义的的构造函数，中转构造逻辑及构造参数
+        };
+        new_.prototype = aClass;    //准备中转原型对象
+        return new new_();          //返回建立最终建立的对象
+    };
+   
+    var Person =        //定义的类
+    {
+        Create: function(name, age)
+        {
+            this.name = name;
+            this.age = age;
+        },
+        SayHello: function()
+        {
+            alert("Hello, I'm " + this.name);
+        },
+        HowOld: function()
+        {
+            alert(this.name + " is " + this.age + " years old.");
+        }
+    };
+   
+    var BillGates = New(Person, ["Bill Gates", 53]);  //调用通用函数创建对象，并以数组形式传递构造参数
+	debugger;
+    BillGates.SayHello();
+    BillGates.HowOld();
+
+    alert(BillGates.constructor == Object);     //输出：true
+	
+	///Step Three
+	//语法甘露：
+    var object =    //定义小写的object基本类，用于实现最基础的方法等
+    {
+        isA: function(aType)   //一个判断类与类之间以及对象与类之间关系的基础方法
+        {
+            var self = this;
+            while(self)
+            {
+                if (self == aType)
+                  return true;
+                self = self.Type;
+            };
+            return false;
+        }
+    };
+   
+    function Class(aBaseClass, aClassDefine)    //创建类的函数，用于声明类及继承关系
+    {
+        function class_()   //创建类的临时函数壳
+        {
+            this.Type = aBaseClass;    //我们给每一个类约定一个Type属性，引用其继承的类
+            for(var member in aClassDefine)
+                this[member] = aClassDefine[member];    //复制类的全部定义到当前创建的类
+        };
+        class_.prototype = aBaseClass;
+        return new class_();
+    };
+   
+    function New(aClass, aParams)   //创建对象的函数，用于任意类的对象创建
+    {
+        function new_()     //创建对象的临时函数壳
+        {
+            this.Type = aClass;    //我们也给每一个对象约定一个Type属性，据此可以访问到对象所属的类
+            if (aClass.Create)
+              aClass.Create.apply(this, aParams);   //我们约定所有类的构造函数都叫Create，这和DELPHI比较相似
+        };
+        new_.prototype = aClass;
+        return new new_();
+    };
+
+    //语法甘露的应用效果：   
+    var Person = Class(object,      //派生至object基本类
+    {
+        Create: function(name, age)
+        {
+            this.name = name;
+            this.age = age;
+        },
+        SayHello: function()
+        {
+            console.log("Hello, I'm " + this.name + ", " + this.age + " years old.");
+        }
+    });
+   
+    var Employee = Class(Person,    //派生至Person类，是不是和一般对象语言很相似？
+    {
+        Create: function(name, age, salary)
+        {
+            Person.Create.call(this, name, age);  //调用基类的构造函数
+            this.salary = salary;
+        },
+        ShowMeTheMoney: function()
+        {
+            console.log(this.name + " $" + this.salary);
+        }
+    });
+
+    var BillGates = New(Person, ["Bill Gates", 53]);
+    var SteveJobs = New(Employee, ["Steve Jobs", 53, 1234]);
+	debugger;
+    BillGates.SayHello();
+    SteveJobs.SayHello();
+    SteveJobs.ShowMeTheMoney();
+   
+    var LittleBill = New(BillGates.Type, ["Little Bill", 6]);   //根据BillGate的类型创建LittleBill
+    LittleBill.SayHello();
+    debugger;
+    console.log(BillGates.isA(Person));       //true
+    console.log(BillGates.isA(Employee));     //false
+    console.log(SteveJobs.isA(Person));       //true
+    console.log(Person.isA(Employee));        //false
+    console.log(Employee.isA(Person));        //true
+	
+//=============================================================
+var t = 5;
+function consoleT(){
+	console.log('%cHello!!', 'font-size: 25px;color:red;');
+}
+while (t > 0) {
+	consoleT();
+	t--;
+}
+
+//=============================================================
+	function testRange(){
+		debugger;
+		var loopL = 5;
+		for (var i = 1; i <= 5; i++){
+			console.log('loop time ' + i);
+		}
+		console.log('i toBe: ' + i);
+		return loopL;
+	}
+	testRange();
+//=============================================================
+	var ssss = [
+		{we:23},
+		{we:43},
+		{we:11}
+	];
+	ssss.sort(function(a, b) {
+		var x = a["we"],
+			y = b["we"];
+		return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+	});
+	
+	var list = [{add:3},{add:4},{add:5}];
+	list.forEach(function(item, index, items){
+		if(item.add > 4) item.add = 9;
+		if(item.add < 4) items.splice(index, 1);
+	});
+	setTimeout(function(){
+		console.log(new Date());
+	}, 1000);
+	setTimeout(function(){
+		console.log(new Date());
+	}, 3000);
+	var ff = [{entryId:4},{entryId:1},{entryId:9}];
+	var fd = ff.sort(function(a, b) {
+		// Sort items by LineNumber(entryId)
+		var x = a["entryId"],
+			y = b["entryId"];
+		return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+	});
+	
+	var res= {};
+	res.sdApp = angular.module("ngApp", []).run(["$rootScope",function($rootScope){
+		$rootScope.showMe = true;
+		$rootScope.showChild = true;
+	}]);
+	angular.element(document).ready(function(){
+		angular.bootstrap(document, ["ngApp"]);
+	});
+	
+	res.sdApp.controller("ctlOne",["$scope", "$rootScope",function($scope, $rootScope){
+		$scope.name = "kkk";
+		$scope.showChild = false;
+		$scope.alertAge = function(){
+			alert($scope.age);
+		};
+		$scope.items= [
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss4", name:"kk4"}
+		];
+	}]);
+	
+	res.sdApp.controller("childOfctlOne",["$scope", "$rootScope",function($scope, $rootScope){
+		//please add source.
+	}]);
+	
+	res.sdApp.controller("ctlTwo",["$scope", "$rootScope",function($scope, $rootScope){
+		$scope.name="controller ctlTwo.";
+		$scope.homePage = "controller homePage";
+	}]);
+</script>
+</head>
+<body>
+	<div data-ng-controller="ctlOne">
+			<div data-ng-bind="name"></div>
+			<div data-ng-bind-template="{{name}}{{age}}"></div>
+			<input type="text" data-ng-model="age"/>
+			<input type="button" data-ng-click="alertAge()" value="alertAgfe"/>
+			<div data-ng-show="showMe">one</div>
+			<div data-ng-if="showMe">two</div>
+			<div data-ng-if="!showMe">three</div>
+			<div data-ng-controller="childOfctlOne">
+				<div data-ng-show="showChild">showChild!!!</div>
+				<div data-ng-repeat="item in items">
+					<p>{{item.id}} = {{item.name}}</p>
+				</div>
+				<div class="sds" data-ng-class="{classOne:true, classTwo:true}">
+						sdasadadasdasdasdada
+				</div>
+			</div>
+	</div>
+	<div data-ng-controller="ctlTwo">
+			<div data-ng-bind="name"></div>
+			<input type="text" data-ng-model="homePage"/>
+			<input type="button" data-ng-click="alertAge()" value="alertAgfe"/>
+			<div data-ng-show="showMe">
+				<p>this model is use $rootScope.showMe</p>
+			</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Practise</title>
+<style>
+.classOne {
+	color:red;
+}
+.classTwo {
+	font-size:15px;
+}
+</style>
+<script src="angular.js" type="text/javascript"></script>
+<script type="text/javascript">
+	var res= {};
+	res.sdApp = angular.module("ngApp", []).run(["$rootScope",function($rootScope){
+		$rootScope.showMe = true;
+		$rootScope.showChild = true;
+		$rootScope.showRepeat = false;
+		
+		var jsWorker = new Worker('./demo_workers.js'),
+			theDom = document.getElementById('showP');
+		jsWorker.onmessage = function(event){
+			//debugger;
+			var po = event.data;
+			while(po > 0){
+				var tmp = document.createElement('p');
+				tmp.innerHTML = 'po = ' + po;
+				theDom.appendChild(tmp);
+				
+				//console.log('%cHello World!', 'font-size:20px;font-weight:bold;color:red;');
+				po--;
+			}
+			$rootScope.$apply(function(){
+				$rootScope.showRepeat = true;
+			});
+		};
+		
+	}]);
+	angular.element(document).ready(function(){
+		angular.bootstrap(document, ["ngApp"]);
+	});
+	
+	res.sdApp.controller("ctlOne",["$scope", "$rootScope",function($scope, $rootScope){
+		$scope.name = "kkk";
+		$scope.showChild = false;
+		$scope.alertAge = function(){
+			alert($scope.age);
+		};
+		$scope.items= [
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss", name:"kk"},
+			{id:"ss2", name:"kk2"},
+			{id:"ss3", name:"kk3"},
+			{id:"ss4", name:"kk4"}
+		];
+	}]);
+	
+</script>
+</head>
+<body>
+	<div id="showP"></div>
+	<div data-ng-controller="ctlOne">
+		<div data-ng-bind="name"></div>
+		<div data-ng-bind-template="{{name}}{{age}}"></div>
+		<input type="text" data-ng-model="age"/>
+		<input type="button" data-ng-click="alertAge()" value="alertAgfe"/>
+		<div data-ng-show="showMe">one</div>
+		<div data-ng-if="showMe">two</div>
+		<div data-ng-if="!showMe">three</div>
+		<div data-ng-repeat="item in items" data-ng-show="showRepeat">
+			<div data-ng-bind="item.id" style="background:#ffff00;"></div>
+			<div data-ng-bind="item.name" style="background:#ffee00;"></div>
+		</div>
+	</div>
+</body>
+</html>

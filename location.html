@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Sales Transaction</title>
+<script src="angular.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+var theApp = angular.module("ngApp", []).run(["$rootScope", function($rootScope){
+
+}]).config(['$httpProvider', '$sceProvider', function($httpProvider, $sceProvider) {
+			$httpProvider.defaults.useXDomain = true;
+			delete $httpProvider.defaults.headers.common['X-Requested-With'];
+			$sceProvider.enabled(false);
+		}]);
+theApp.factory("repeatData", function(){
+	var repeatData = [];
+	return {
+		data: function(){
+			return repeatData;
+		},
+		add:function(index, item){
+				if(index === 0 || !index){
+					repeatData.unshift(item);
+					return repeatData;
+				}
+				if(index === repeatData.length){
+					repeatData.push(item);
+					return repeatData;
+				}
+				var tmp = repeatData.splice(0, index, item);
+				repeatData = tmp.concat(repeatData);
+				return repeatData;
+		},
+		remove: function(index){
+			if(index === 0 || !index){
+					repeatData.shift(item);
+					return repeatData;
+				}
+				if(index === repeatData.length){
+					repeatData.pop(item);
+					return repeatData;
+				}
+				var tmp = repeatData.slice(0, index);
+				repeatData = tmp.concat(repeatData.slice(index +1));
+				return repeatData;
+		},
+		reverse: function(){
+			return repeatData.reverse();
+		},
+		get:function(index){
+			return repeatData[index];
+		}
+	}
+});
+theApp.controller("con1", ["$scope", "$rootScope", "repeatData", function($scope, $rootScope, serviceData){
+	$rootScope.scope1 = $scope;
+	$scope.label="Tom Jim Annie.";
+}]);
+
+angular.element(document).ready(function(){
+	angular.bootstrap(document, ["ngApp"]);
+});
+</script>
+</head>
+<body>
+<div data-ng-controller="con1" style="background-color:#33ff99">
+	<div>{{label}}</div>
+	<iframe src="rme.html"> </iframe>
+</div>
+</body>
+</html>

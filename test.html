@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Sales Transaction</title>
+<script src="angular.js" type="text/javascript"></script>
+<script type="text/javascript">
+//------------------------------filter&directive
+angular.module("usb", []).directive("draggAble",["$rootScope", function($rootScope){
+	return {
+		restrict:"EA",
+		scope:true,
+		replace:false,
+		//template:"",
+		link:function(scope, element, attrs){
+			element[0].style.position = "relative";
+			element[0].style.border = "solid 3px";
+			var isMouseDown = false;
+			var parentPx = 0;
+			var parentPy = 0;
+			var dd = element[0].parentNode;
+			while(dd && dd.tagName != "BODY"){
+				parentPx += dd.offsetLeft;
+				parentPy += dd.offsetTop;
+				dd = dd.parentNode;
+			}
+			var pos={
+				xLocation:0,
+				yLocation:0
+			};
+			var moveCss = {color:"red",background:"highlight"};
+			element.bind("mousedown", mdown);
+			angular.element(document).bind("mouseup", mup);
+			element.bind("mousemove", mmove);
+			function mdown(e){
+				isMouseDown = true;
+				var target = e.target;
+				target.style.color = "red";
+				target.style.background = "highlight";
+				pos={
+					xLocation:e.clientX - parentPx,
+					yLocation:e.clientY - parentPy
+				};
+			}
+			function mup(e){
+				isMouseDown = false;
+				var target = e.target;
+				element[0].style.color = "";
+				element[0].style.background = "";
+			}
+			function mmove(e){
+				if(!isMouseDown) return;
+				var target = e.target;
+				target.style.left = e.clientX - pos.xLocation + "px";
+				target.style.top = e.clientY - pos.yLocation + "px";
+				console.log("position: " + target.style.position + "; x: " + target.style.left + "; y: " + target.style.top);
+			}
+		}
+		//controller:["$scope", function($scope){
+		//}]
+	};
+}]).directive("npcHit",function($rootScope){
+	return {
+		restrict:"AE",
+		replace:false,
+		template:"<div ng-transclude data-ng-click='alrt()'></div>",
+		scope:{
+			title: "=myAttr1",
+			alrt:"&showMe"
+		},
+		//scope:true,
+		transclude:true,
+		link:function($scope, element, attrs){
+			alert($scope.label);
+		},
+		controller:["$scope", function($scope){
+			$scope.name="JHon";
+			$scope.label = "the label";
+			$scope.doClose = function(){
+				alert("do close!!");
+			};
+		}]
+	};
+}).filter("toSum", function(){
+	var toSum = function(param1, param2){
+		return Math.abs(param1) + Math.abs(param2);
+	};
+	return toSum;
+});
+	debugger;
+console.debug("sdsd");
+//------------------------------//
+var theApp = angular.module("ngApp", ["usb"]).run(["$rootScope", function($rootScope){
+	$rootScope.gHelp = {};
+	$rootScope.pHelp = {};
+	$rootScope.gHelp = {
+		tom: {name:"Tom"},
+		jim: {name:"Jim"}
+	};
+	$rootScope.pHelp = {
+		jim: {name:"Jim"}
+	};
+}]);
+theApp.factory("repeatData", function(){
+	var repeatData = [];
+	return {
+		data: function(){
+			return repeatData;
+		},
+		add:function(index, item){
+				if(index === 0 || !index){
+					repeatData.unshift(item);
+					return repeatData;
+				}
+				if(index === repeatData.length){
+					repeatData.push(item);
+					return repeatData;
+				}
+				var tmp = repeatData.splice(0, index, item);
+				repeatData = tmp.concat(repeatData);
+				return repeatData;
+		},
+		remove: function(index){
+			if(index === 0 || !index){
+					repeatData.shift(item);
+					return repeatData;
+				}
+				if(index === repeatData.length){
+					repeatData.pop(item);
+					return repeatData;
+				}
+				var tmp = repeatData.slice(0, index);
+				repeatData = tmp.concat(repeatData.slice(index +1));
+				return repeatData;
+		},
+		reverse: function(){
+			return repeatData.reverse();
+		},
+		get:function(index){
+			return repeatData[index];
+		}
+	}
+});
+theApp.controller("con1", ["$scope", "$rootScope", "repeatData", function($scope, $rootScope, serviceData){
+	$rootScope.scope1 = $scope;
+	$scope.switchMe = "a";
+	$scope.hi = true;
+	$scope.kakasi = "this is kakasi.";
+	$scope.i = "this is a MODEL OF ngSwitch.";
+	$scope.gHelp = {};
+	$scope.gHelp = {
+		tom: {name:"Tom"}
+	};
+	$scope.label = " 标题【con1】! ";
+	$scope.items = [];
+	$scope.showMe = function(){
+		alert("rte4565dge");
+	};
+	$scope.additem = function(){
+		var item = {name: $scope.name, age: $scope.age, scope:$scope.scope};
+		$scope.items = serviceData.add(0, item);
+	};
+}]);
+
+theApp.controller("con2", ["$scope", "$rootScope",  "$timeout", "repeatData", function($scope, $rootScope, $timeout, serviceData){
+	$rootScope.scope2 = $scope;
+	$scope.label = "标题【con2】! ";
+	$scope.items = serviceData.data();
+	$scope.additem = function(){
+		var item = {name: $scope.name, age: $scope.age, scope:$scope.scope};
+		$scope.items = serviceData.add(0, item);
+	};
+	$scope.changeTitle = function(){
+		$rootScope.scope1.label = "标题2影响标题1";
+	};
+	$scope.changeTitle1 = function(){
+		setTimeout(function(){
+			$rootScope.scope1.label = "setTimeout(标题2)";
+			$scope.label = "setTimeout(标题2)";
+		}, 10);
+	};
+	$scope.changeTitle2 = function(){
+		$timeout(function(){
+			$rootScope.scope1.label = "$timeout(标题2)";
+			$scope.label = "$timeout(标题2)";
+		}, 10);
+	};
+}]);
+function apply(scope, fun){
+	if(!scope.$$phase){
+		scope.$apply(fun());
+	} else {
+		fun();
+	}
+}
+function changeScopeValue(){
+	var rootScope = angular.element(document).scope();
+	var new1Value = document.querySelector("#con1").value;
+	var new2Value = document.querySelector("#con2").value;
+	if(new1Value){
+		apply(rootScope.scope1 , function(){		//[rootScope.scope1 =>rootScope] it works too.
+			rootScope.scope1.label = new1Value;	//rootScope.$digest() => it works
+			return "scope1.label = 'fsfsfsfs'";	// it works
+			/*
+			return "$rootScope.scope1.label = 'fsfsfsfs'";	// it  not work
+			return "$rootScope.label = 'fsfsfsfs'";	// it  not work
+			*/
+		});
+	}
+	if(new2Value){
+		apply(rootScope.scope1 , function(){
+			rootScope.scope2.label = new2Value;	//rootScope.$digest() => it works
+			return "scope2.label = 'fsfsfsfs'";	// it works
+		});
+	}
+}
+angular.element(document).ready(function(){
+	angular.bootstrap(document, ["ngApp"]);
+});
+</script>
+</head>
+<body>
+<p data-ng-bind="'2' | toSum: 5"></p>
+<div data-ng-controller="con1" style="background-color:#22ee00">
+	<npc-hit my-attr1="label" show-me="showMe()">
+		<div>Alert the outSide exception!!!</div>
+		here you are! {{label}},
+	</npc-hit>
+	<div data-ng-if="dfd">{{label}}</div>
+	<div data-ng-switch="switchMe">
+			<div data-ng-switch-when="a">
+				<p>{{kakasi}}</p>
+			</div>
+			<div data-ng-switch-when="b">
+				<div data-ng-show="hi">
+					<input type="text" data-ng-model="l"/>
+				</div>
+			</div>
+			<div data-ng-switch-default>
+				<p>{{kakasi}}</p>
+			</div>
+	</div>
+	<div data-ng-bind="pHelp.jim.name"></div>
+	<div  data-ng-repeat="item in items">
+		<span>{{item.name}}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span>{{item.age}}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span>{{item.scope}}</span>
+	</div>
+	<div data-dragg-able>
+		姓名：<input data-ng-model = "name"/>&nbsp;&nbsp;
+		年龄：<input data-ng-model = "age"/>&nbsp;&nbsp;
+		成绩：<input data-ng-model = "scope"/>
+		<input type="button" data-ng-click="additem()" value="【标题1】">
+	</div>
+</div>
+<div data-ng-controller="con2" style="background-color:#33ff99">
+	<div>{{label}}</div>
+	<div  data-ng-repeat="item in items">
+		<span>{{item.name}}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span>{{item.age}}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span>{{item.scope}}</span>
+	</div>
+	<div>
+		姓名：<input data-ng-model = "name"/>&nbsp;&nbsp;
+		年龄：<input data-ng-model = "age"/>&nbsp;&nbsp;
+		成绩：<input data-ng-model = "scope"/>
+		<input type="button" data-ng-click="additem()" value="【标题2】"/>
+	</div>
+	<div>
+		<input type="button" data-ng-click="changeTitle()" value="【标题2影响标题1】"/>
+		<input type="button" data-ng-click="changeTitle1()" value="【setTimeout(标题2)】"/>
+		<input type="button" data-ng-click="changeTitle2()" value="【$timeout(标题2)】"/>
+	</div>
+</div>
+<div>
+	controller 1:<input type="text" id="con1" style="width:20px;height:16px;"/>&nbsp;&nbsp;
+	controller 2:<input type="text" id="con2" style="width:20px;height:16px;"/>&nbsp;&nbsp;
+	<input type="button" value="outCahngeButton" onclick="changeScopeValue();"/>
+</div>
+<form name="myForm">
+	<p>Username:<br>
+		<input type="text" name="user" ng-model="user" required>
+			<span style="color:red" ng-show="myForm.user.$dirty && myForm.user.$invalid">
+			<span ng-show="myForm.user.$error.required">Username is required.</span>
+		</span>
+	</p>
+	<p>Email:<br>
+		<input type="email" name="email" ng-model="email" required>
+			<span style="color:red" ng-show="myForm.email.$dirty && myForm.email.$invalid">
+			<span ng-show="myForm.email.$error.required">Email is required.</span>
+		<span ng-show="myForm.email.$error.email">Invalid email address.</span>
+	</span>
+	</p>
+</form>
+</body>
+</html>

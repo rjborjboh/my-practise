@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Access-Control-Allow-Origin" content="">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style>
+.show{
+	width: 200px;
+	height: 150px;
+	background: #ffffee;
+}
+</style>
+<script type="text/javascript">
+	window.onload = function(){
+		var jsWorker = new Worker('./demo_workers.js'),
+			theDom = document.getElementById('show');
+		jsWorker.onmessage = function(event){
+			//debugger;
+			//loopP(event.data * 100);
+			long();
+		};
+		function long(){
+			var result = 0;
+			for (var i = 0; i<1000; i++){
+				for (var j = 0; j<1000; j++){
+					for (var k = 0; k<1000; k++){
+						result += i + j + k;
+						console.log('%cHello World!', 'font-size:20px;font-weight:bold;color:red;');
+					}
+				}
+			}
+		}
+		function loopP(po){
+			//var po = 100;
+			//console.time();
+			while(po > 0){
+				var tmp = document.createElement('p');
+				tmp.innerHTML = 'po = ' + po;
+				theDom.appendChild(tmp);
+				
+				//console.log('%cHello World!', 'font-size:20px;font-weight:bold;color:red;');
+				po--;
+			}
+			console.log('%c===============================', 'font-size:30px;font-weight:bold;color:blue;');
+			//console.timeEnd();
+		}
+		//loopP();
+	};
+</script>
+</head>
+<body>
+	<div id="show">
+	</div>
+	<hr>
+</body>
+</html>
