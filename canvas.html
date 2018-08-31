@@ -168,12 +168,84 @@ var canvasBar = document.getElementById('3dBar'),
     plot.stroke();
 });
 </script>
+<script>
+CanvasRenderingContext2D.prototype.ellipse2 = function( x, y, a, b)
+{
+   this.save();
+   // a,bの大きい方をarc関数の半径パラメーター
+   var r = (a > b) ? a : b; 
+   var ratioX = a / r; //横軸のズーム比率
+   var ratioY = b / r; //縦軸のズーム比率
+   this.scale(ratioX, ratioY); //ズームを行う（平均圧縮）
+   this.beginPath();
+   //楕円の左端から逆の時計を描き始める
+   this.moveTo((x + a) / ratioX, y / ratioY);
+   this.arc(x / ratioX, y / ratioY, r, 0, 2 * Math.PI);
+   
+   this.restore();
+   this.stroke();
+};
+
+
+CanvasRenderingContext2D.prototype.canvacBucket = function(location, sizes,colors)
+{
+	// 整体背景色						データで塗る色
+	var FILLSTYLE1 = colors.color1, FILLSTYLE2 = colors.color2;
+    var x1=location.x1, y1=location.y1, a1=location.a1, b1=location.b1;
+	var x2=location.x1, y2=location.y1 + sizes.h1, a2=location.a1, b2=location.b1;
+    var x3=location.x1, y3=location.y1 + sizes.h2, a3=location.a1, b3=location.b1;
+    
+    this.strokeStyle = '#7c9fba';
+	
+    this.fillStyle = FILLSTYLE1;
+    this.fillRect(0,b1,a1*2,y2-y1);
+    this.fill();
+    
+    
+    this.strokeStyle = FILLSTYLE2;
+    this.fillStyle = FILLSTYLE2;
+    this.fillRect(x3-a3,y3,a3*2,y2-y3);
+	this.ellipse2(x2, y2, a2, b2);
+    this.fill();
+    
+    this.strokeStyle = '#7c9fba';
+    this.fillStyle = FILLSTYLE2;
+	this.ellipse2(x3, y3, a3, b3);
+    this.fill();
+    
+    this.beginPath();
+	this.moveTo(x1-a1, y1);
+	this.lineTo(x2-a2, y2);
+	this.stroke();
+    
+    this.beginPath();
+    this.moveTo(x1+a1, y1);
+    this.lineTo(x2+a2, y2);
+    this.stroke();
+	
+    this.fillStyle = FILLSTYLE1;
+    this.lineWidth = 2;
+	this.ellipse2(x1, y1, a1, b1);
+    this.fill();
+};
+
+var canvasBar2 = document.getElementById('3dBar2'),
+	plot2 = canvasBar2 && canvasBar2.getContext('2d');
+	
+if (plot1) {
+    plot1.canvacBucket({x1:45, y1:16, a1:43, b1:15}, {h1: 100, h2: 50}, {color1:'#5581b6', color2:'#FFFF00'});
+}
+</script>
 </head>
 <body>
 	<canvas id='canvas' width='600' height='600'>
 		Canvas not supported
 	</canvas>
     <canvas id='3dBar' width='90' height='140'>
+        Canvas not supported
+    </canvas>
+	
+    <canvas id='3dBar2' width='90' height='140'>
         Canvas not supported
     </canvas>
 </body>
